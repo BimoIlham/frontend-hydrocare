@@ -8,7 +8,7 @@ export default defineConfig({
     // Proxy ke backend saat development
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'https://backend-hydrocare.vercel.app',
         changeOrigin: true,
       },
     },
