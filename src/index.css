@@ -1,0 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(14, 165, 233, 0.25) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: rgba(14, 165, 233, 0.25);
+    border-radius: 999px;
+  }
+
+  body {
+    @apply font-sans antialiased;
+    min-height: 100vh;
+    color: #1a2d42;
+    background: linear-gradient(135deg, #dbeafe 0%, #e8f4fd 25%, #f8fbff 50%, #e8f4fd 75%, #dbeafe 100%);
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    background: rgba(14, 165, 233, 0.25);
+    color: #075985;
+  }
+}
+
+@layer components {
+  /* ─── Glassmorphism Card — Higher Contrast ─── */
+  .card {
+    @apply rounded-2xl p-6 border transition-all duration-300;
+    background: rgba(255, 255, 255, 0.72);
+    border-color: rgba(14, 165, 233, 0.12);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 4px 24px rgba(14, 165, 233, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+  .card:hover {
+    background: rgba(255, 255, 255, 0.82);
+    border-color: rgba(14, 165, 233, 0.22);
+    box-shadow: 0 8px 32px rgba(14, 165, 233, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  }
+
+  /* ─── Primary Button — Gradient Blue ─── */
+  .btn-primary {
+    @apply px-6 py-3 rounded-xl font-semibold text-white
+           active:scale-95 transition-all duration-300;
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #075985 100%);
+    box-shadow: 0 4px 15px rgba(3, 105, 161, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+  .btn-primary:hover {
+    box-shadow: 0 6px 25px rgba(3, 105, 161, 0.50), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+  }
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* ─── Outline Button — Glass ─── */
+  .btn-outline {
+    @apply px-5 py-2.5 rounded-xl font-medium
+           active:scale-95 transition-all duration-300;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1.5px solid rgba(3, 105, 161, 0.3);
+    color: #075985;
+  }
+  .btn-outline:hover {
+    background: rgba(14, 165, 233, 0.08);
+    border-color: rgba(3, 105, 161, 0.5);
+    box-shadow: 0 0 15px rgba(14, 165, 233, 0.10);
+  }
+
+  /* ─── Input Field — Glass ─── */
+  .input-field {
+    @apply w-full rounded-xl px-4 py-3 placeholder-gray-400
+           transition-all duration-300 outline-none;
+    color: #1a2d42;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1.5px solid rgba(14, 165, 233, 0.2);
+    backdrop-filter: blur(8px);
+  }
+  .input-field:focus {
+    border-color: rgba(3, 105, 161, 0.5);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12);
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  /* ─── Glass container utility ─── */
+  .glass {
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(14, 165, 233, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 4px 24px rgba(14, 165, 233, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  }
+
+  /* ─── Gradient text helper — HIGHER CONTRAST ─── */
+  .text-gradient {
+    background: linear-gradient(135deg, #0369a1, #075985);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+@layer utilities {
+  .animate-delay-100 { animation-delay: 100ms; }
+  .animate-delay-200 { animation-delay: 200ms; }
+  .animate-delay-300 { animation-delay: 300ms; }
+  .animate-delay-400 { animation-delay: 400ms; }
+  .animate-delay-500 { animation-delay: 500ms; }
+}
+
+/* ─── Shimmer animation for progress bars ─── */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
