@@ -4,7 +4,7 @@ import axios from 'axios'
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'https://backend-hydrocare.vercel.app',
   headers: { 'Content-Type': 'application/json' },
-  timeout: 10000,
+  timeout: 30000,
 })
 
 // Interceptor: inject x-user-id header and error handling global
