@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // Satu instance axios yang digunakan di seluruh aplikasi
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+  baseURL: import.meta.env.VITE_API_URL || 'https://backend-hydrocare.vercel.app',
   headers: { 'Content-Type': 'application/json' },
   timeout: 10000,
 })
