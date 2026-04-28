@@ -51,14 +51,23 @@ export default function QuickAddWater({ targetMl, onAdded }) {
   const dismissToast = () => { if (toastTimerRef.current) clearTimeout(toastTimerRef.current); setToast(null) }
 
   const executeAdd = async (ml) => {
-    setLoading(ml)
+    // 1. Optimistic UI Update (Update layar seketika)
+    const tempId = `temp-${Date.now()}`
+    const tempLog = { amount_ml: ml, id: tempId, logged_at: new Date().toISOString() }
+    addLog(tempLog)
+    showToast(tempId, ml)
+    
+    // 2. Background API Call (tanpa loading UI)
     try {
-      const response = await historyService.addLog(ml)
-      const logId = response.data?.id
-      addLog({ amount_ml: ml, id: logId, logged_at: new Date() })
-      showToast(logId, ml); onAdded?.()
-    } catch (err) { console.error('Gagal mencatat:', err) }
-    finally { setLoading(null) }
+      await historyService.addLog(ml)
+      // Sengaja tidak usah setLoading(null) karena sudah update seketika
+      onAdded?.() // Panggil untuk sync dengan backend secara senyap
+    } catch (err) { 
+      console.error('Gagal mencatat ke server:', err)
+      // Rollback jika gagal
+      useHydrationStore.getState().removeLog(tempId)
+      // Bisa tambahkan toast error di sini jika perlu
+    }
   }
 
   const handleAdd = async (ml) => {

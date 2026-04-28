@@ -241,7 +241,7 @@ function ProgressBar({ current, target }) {
 }
 
 export default function Dashboard() {
-  const { profile, dailyTarget, hydrationBreakdown } = useUserStore()
+  const { profile, dailyTarget, hydrationBreakdown, userId } = useUserStore()
   const { totalToday, todayLogs, streak, weeklyData, setTodayData, setWeeklyData } = useHydrationStore()
   const [weather, setWeather] = useState(null)
   const [loadingWeather, setLoadingWeather] = useState(true)
@@ -250,6 +250,7 @@ export default function Dashboard() {
   useReminder(2)
 
   const loadData = async () => {
+    if (!userId) return // Jangan fetch jika belum ada userId
     try {
       const [todayRes, weekRes] = await Promise.all([historyService.getToday(dailyTarget), historyService.getWeekly(dailyTarget)])
       setTodayData(todayRes.logs || [], todayRes.total_ml || 0)
@@ -262,7 +263,12 @@ export default function Dashboard() {
     catch { setWeather(null) }
     finally { setLoadingWeather(false) }
   }
-  useEffect(() => { loadData(); loadWeather() }, [])
+  useEffect(() => { 
+    if (userId) {
+      loadData()
+      loadWeather()
+    }
+  }, [userId])
 
   const getGreeting = () => {
     const hour = new Date().getHours()

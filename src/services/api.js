@@ -1,4 +1,5 @@
 import axios from 'axios'
+import useUserStore from '../store/useUserStore'
 
 // Satu instance axios yang digunakan di seluruh aplikasi
 const api = axios.create({
@@ -10,6 +11,14 @@ const api = axios.create({
 // Interceptor: inject x-user-id header and error handling global
 api.interceptors.request.use((config) => {
   try {
+    // 1. Coba baca dari Zustand State dulu (instan, ada di memory)
+    const state = useUserStore.getState()
+    if (state.userId) {
+      config.headers['x-user-id'] = state.userId
+      return config
+    }
+    
+    // 2. Fallback baca dari Local Storage (bisa ada delay)
     const rawData = localStorage.getItem('hydrocare-user')
     if (rawData) {
       const data = JSON.parse(rawData)
