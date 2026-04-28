@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { historyService } from '../../services/historyService'
 import useHydrationStore from '../../store/useHydrationStore'
-import { Droplet, CupSoda, GlassWater, Cylinder, AlertTriangle, CheckCircle2, Clock, Trash2, Plus } from 'lucide-react'
+import { Droplet, CupSoda, GlassWater, Cylinder, AlertTriangle, CheckCircle2, Clock, Trash2, Plus, X } from 'lucide-react'
 
 const QUICK_AMOUNTS = [
   { label: 'Tegukan',       ml: 100,  icon: Droplet },
@@ -18,6 +18,8 @@ export default function QuickAddWater({ targetMl, onAdded }) {
   const [loading, setLoading] = useState(null)
   const [showCustom, setShowCustom] = useState(false)
   const [toast, setToast] = useState(null)
+  const [showExcessModal, setShowExcessModal] = useState(false)
+  const [pendingAmount, setPendingAmount] = useState(null)
   const toastTimerRef = useRef(null)
   const todayLogs = useHydrationStore((s) => s.todayLogs)
   const totalToday = useHydrationStore((s) => s.totalToday)
@@ -48,12 +50,7 @@ export default function QuickAddWater({ targetMl, onAdded }) {
   }
   const dismissToast = () => { if (toastTimerRef.current) clearTimeout(toastTimerRef.current); setToast(null) }
 
-  const handleAdd = async (ml) => {
-    const projectedTotal = totalToday + ml
-    if (projectedTotal > targetMl * 1.2 && targetMl > 0) {
-      const confirmed = window.confirm(`⚠️ Perhatian!\n\nDengan menambahkan ${ml} mL, total kamu akan menjadi ${projectedTotal} mL.\nIni melebihi target harian (${targetMl} mL) sebesar ${projectedTotal - targetMl} mL.\n\nTerlalu banyak minum air juga tidak baik untuk kesehatan.\nYakin ingin melanjutkan?`)
-      if (!confirmed) return
-    }
+  const executeAdd = async (ml) => {
     setLoading(ml)
     try {
       const response = await historyService.addLog(ml)
@@ -62,6 +59,22 @@ export default function QuickAddWater({ targetMl, onAdded }) {
       showToast(logId, ml); onAdded?.()
     } catch (err) { console.error('Gagal mencatat:', err) }
     finally { setLoading(null) }
+  }
+
+  const handleAdd = async (ml) => {
+    const projectedTotal = totalToday + ml
+    if (projectedTotal > targetMl * 1.2 && targetMl > 0) {
+      setPendingAmount(ml)
+      setShowExcessModal(true)
+      return
+    }
+    executeAdd(ml)
+  }
+
+  const confirmExcessAdd = () => {
+    if (pendingAmount) executeAdd(pendingAmount)
+    setShowExcessModal(false)
+    setPendingAmount(null)
   }
 
   return (
@@ -118,6 +131,50 @@ export default function QuickAddWater({ targetMl, onAdded }) {
             </div>
             <button onClick={handleUndo} className="px-3 py-1 rounded-lg bg-sky-100 hover:bg-sky-200 transition-colors font-semibold text-sky-600 text-xs">Undo</button>
             <button onClick={dismissToast} className="text-gray-400 hover:text-gray-600 transition-colors ml-1 text-xs">✕</button>
+          </div>
+        </div>
+      )}
+      {/* ─── Kelebihan Air Modal ─── */}
+      {showExcessModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-fade-in" onClick={() => { setShowExcessModal(false); setPendingAmount(null); }} />
+          <div className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden animate-fade-in border border-slate-100">
+            {/* Header Area */}
+            <div className="bg-gradient-to-br from-red-50 to-orange-50 p-6 flex flex-col items-center text-center border-b border-red-100/50">
+              <div className="w-16 h-16 rounded-full bg-white shadow-sm flex items-center justify-center mb-4 relative">
+                <div className="absolute inset-0 rounded-full border-2 border-red-100 animate-ping opacity-20" />
+                <AlertTriangle className="w-8 h-8 text-red-500" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 tracking-tight">Perhatian!</h3>
+              <p className="text-sm text-slate-500 mt-2 leading-relaxed">
+                Dengan menambahkan <span className="font-semibold text-sky-600">{pendingAmount} mL</span>, total kamu akan menjadi <span className="font-semibold text-red-600">{totalToday + pendingAmount} mL</span>.
+                Ini melebihi target harian (<span className="font-semibold text-sky-600">{targetMl} mL</span>). Terlalu banyak minum air juga tidak baik untuk kesehatan. Yakin ingin melanjutkan?
+              </p>
+            </div>
+            
+            {/* Action Area */}
+            <div className="p-5 flex gap-3 bg-white">
+              <button
+                onClick={() => { setShowExcessModal(false); setPendingAmount(null); }}
+                className="flex-1 py-3 px-4 rounded-xl text-slate-600 font-semibold hover:bg-slate-50 border border-slate-200/60 transition-all"
+              >
+                Batal
+              </button>
+              <button
+                onClick={confirmExcessAdd}
+                className="flex-1 py-3 px-4 rounded-xl text-white font-bold bg-red-500 hover:bg-red-600 shadow-md shadow-red-500/20 hover:shadow-red-500/30 transition-all flex items-center justify-center gap-2"
+              >
+                <Plus className="w-4 h-4" /> Ya, Tambah
+              </button>
+            </div>
+            
+            {/* Close Icon Corner */}
+            <button 
+              onClick={() => { setShowExcessModal(false); setPendingAmount(null); }}
+              className="absolute top-4 right-4 p-2 text-red-400 hover:text-red-600 hover:bg-red-100/50 rounded-full transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
         </div>
       )}
