@@ -10,6 +10,11 @@ const api = axios.create({
 
 // Interceptor: inject x-user-id header and error handling global
 api.interceptors.request.use((config) => {
+  // Cegah browser caching untuk request GET agar data selalu fresh saat direfresh
+  if (config.method && config.method.toLowerCase() === 'get') {
+    config.params = { ...config.params, _t: Date.now() }
+  }
+
   try {
     // 1. Coba baca dari Zustand State dulu (instan, ada di memory)
     const state = useUserStore.getState()
