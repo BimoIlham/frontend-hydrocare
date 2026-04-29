@@ -169,7 +169,7 @@ function TodayTimeline({ logs, onDelete }) {
 
 export default function Tracker() {
   const { dailyTarget } = useUserStore()
-  const { todayLogs, weeklyData, totalToday, setTodayData, setWeeklyData } = useHydrationStore()
+  const { todayLogs, weeklyData, totalToday, setTodayData, setWeeklyData, removeLog } = useHydrationStore()
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -185,9 +185,21 @@ export default function Tracker() {
   }, [dailyTarget])
 
   const handleDelete = async (logId) => {
-    await historyService.deleteLog(logId)
-    const todayRes = await historyService.getToday(dailyTarget)
-    setTodayData(todayRes.logs || [], todayRes.total_ml || 0)
+    // 1. Optimistic UI Update (Hapus dari layar seketika)
+    removeLog(logId)
+    
+    // 2. Background API Call
+    try {
+      await historyService.deleteLog(logId)
+      // Optional: Update grafik mingguan di background
+      const weekRes = await historyService.getWeekly(dailyTarget)
+      setWeeklyData(weekRes.data || [])
+    } catch (err) {
+      console.error('Gagal menghapus:', err)
+      // Rollback dengan memuat ulang data asli jika gagal
+      const todayRes = await historyService.getToday(dailyTarget)
+      setTodayData(todayRes.logs || [], todayRes.total_ml || 0)
+    }
   }
 
   const todayStats = useMemo(() => {
